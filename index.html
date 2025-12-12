@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Dash Tap — Neon</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    :root{--bg:#060717;--card:#0d1620;--accent:#00ffe1;--muted:#9aa4b2;--hot:#ff6b6b}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#020316,#081428);color:#eaf6f1}
+    .container{width:360px;max-width:96vw;margin:14px auto;padding:14px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));box-shadow:0 8px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.02)}
+    header{display:flex;justify-content:space-between;align-items:center}
+    h1{margin:0;font-size:18px}
+    .small{font-size:12px;color:var(--muted)}
+    #gameWrap{margin-top:12px;display:flex;flex-direction:column;align-items:center}
+    canvas{width:320px;height:480px;border-radius:12px;background:linear-gradient(180deg,#041022,#081827);touch-action:none}
+    .hud{width:320px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+    .scoreBox{background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:10px;font-weight:700}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+    .btn{background:linear-gradient(180deg,#12202a,#0a1418);padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);font-size:13px;color:#eaf6f1}
+    .panel{background:linear-gradient(180deg,#071226,#0c1720);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);width:300px;text-align:center}
+    .big{font-size:22px;font-weight:800;margin:6px 0}
+    .muted{color:var(--muted);font-size:13px}
+    .shop{display:flex;gap:8px;margin-top:8px;overflow:auto;padding-bottom:8px}
+    .skin{min-width:64px;height:64px;border-radius:10px;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.03)}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:50}
+    .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60}
+    .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0d1720;color:#eaf6f1;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04)}
+  </style>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7478962418871581" crossorigin="anonymous"></script>
+  <script src="https://telegram.org/js/games.js"></script>
+</head>
+<body>
+  <div class="container" id="app">
+    <header>
+      <div>
+        <h1>Dash Tap</h1>
+        <div class="small" id="userName">Guest</div>
+      </div>
+      <div style="text-align:right">
+        <div class="small">Coins <span id="coinCount">0</span></div>
+        <div class="small">Streak <span id="streak">0</span></div>
+      </div>
+    </header>
+    <div id="gameWrap">
+      <div style="position:relative">
+        <canvas id="gameCanvas" width="320" height="480"></canvas>
+        <div id="startScreen" style="display:flex;position:absolute;inset:0;align-items:center;justify-content:center;z-index:20">
+          <div class="panel">
+            <div class="big">Dash Tap — Neon</div>
+            <div class="muted">Tap the glowing target before the timer runs out. Each hit speeds up the game.</div>
+            <div style="height:12px"></div>
+            <button class="btn" id="startBtn">Start</button>
+            <div style="height:8px"></div>
+            <div style="display:flex;justify-content:space-between;margin-top:10px">
+              <div class="muted">Best <strong id="bestLocal">0</strong></div>
+              <div class="muted">Mode <strong id="modeLabel">Classic</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hud">
+        <div class="scoreBox">Score: <span id="score">0</span></div>
+        <div class="controls">
+          <button class="btn" id="adBtn">Watch Ad +100 Coins</button>
+          <button class="btn" id="shopBtn">Shop</button>
+          <button class="btn" id="leaderBtn">Leaderboard</button>
+        </div>
+      </div>
+      <div id="shopModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center">
+        <div class="modal-backdrop"></div>
+        <div class="panel modal" style="width:320px;max-width:94vw">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="big">Shop</div><button class="btn" id="closeShop">Close</button>
+          </div>
+          <div class="muted" style="margin-top:6px">Buy skins using coins</div>
+          <div class="shop" id="shopList"></div>
+        </div>
+      </div>
+      <div id="leaderModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center">
+        <div class="modal-backdrop"></div>
+        <div class="panel modal" style="width:320px;max-width:94vw">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="big">Leaderboard</div><button class="btn" id="closeLeader">Close</button>
+          </div>
+          <div id="leaderList" style="margin-top:8px;max-height:260px;overflow:auto"><div class="muted">Loading…</div></div>
+        </div>
+      </div>
+      <footer style="text-align:center;margin-top:8px"><div class="muted">Built for Telegram Mini Apps — Works in browser too</div></footer>
+    </div>
+  </div>
+  <div id="toastHolder" style="pointer-events:none"></div>
+  <audio id="tapSound" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
+  <audio id="gameOverSound" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-losing-bleep-2029.mp3"></audio>
+
+  <script>
+    const SHEETDB_URL = "https://sheetdb.io/api/v1/1ir7bgefz4eyr";
+
+    // Game state (declared globally)
+    let score = 0, best = Number(localStorage.getItem('best') || 0), timeLimit = 1200, running = false;
+    let target = { x: 160, y: 240, r: 36 }, timerRef = null, particles = [];
+    let coins = Number(localStorage.getItem('coins') || 0);
+    let streak = Number(localStorage.getItem('streak') || 0);
+    let lastPlay = Number(localStorage.getItem('lastPlay') || 0);
+    let skin = localStorage.getItem('skin') || 'neon';
+
+    const skins = [
+      { id: 'neon', cost: 0, label: 'Neon', draw: (x, y, r) => { let g = ctx.createRadialGradient(x, y, 2, x, y, r); g.addColorStop(0, '#00ffe1'); g.addColorStop(1, '#00383a'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); } },
+      { id: 'gold', cost: 150, label: 'Gold', draw: (x, y, r) => { let g = ctx.createLinearGradient(x - r, y - r, x + r, y + r); g.addColorStop(0, '#ffdc7b'); g.addColorStop(1, '#d88b00'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); } },
+      { id: 'galaxy', cost: 250, label: 'Galaxy', draw: (x, y, r) => { let g = ctx.createRadialGradient(x, y, 2, x, y, r); g.addColorStop(0, '#b28cff'); g.addColorStop(1, '#140026'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); } },
+      { id: 'block', cost: 80, label: 'Block', draw: (x, y, r) => { ctx.fillStyle = '#ff7b7b'; ctx.fillRect(x - r, y - r, r * 2, r * 2); } }
+    ];
+
+    // Telegram WebApp & Stars
+    const tg = window.Telegram?.WebApp || null;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      if (tg.initDataUnsafe?.user) {
+        document.getElementById('userName').textContent = tg.initDataUnsafe.user.first_name || tg.initDataUnsafe.user.username || 'Player';
+      }
+
+      const items = [
+        { id: "noads", title: "Remove Ads Forever", price: 19 },
+        { id: "doublecoins", title: "2x Coins Forever", price: 49 },
+        { id: "vip", title: "VIP Skin + 500 Coins", price: 99 }
+      ];
+
+      tg.MainButton.text = "Shop (⭐)";
+      tg.MainButton.color = "#00ffe1";
+      tg.MainButton.textColor = "#000";
+      tg.MainButton.show();
+
+      tg.MainButton.onClick(() => {
+        tg.showPopup({
+          title: "Buy with Stars",
+          message: "Choose a boost",
+          buttons: items.map(item => ({ type: "default", text: `${item.title} — ${item.price} ⭐`, id: item.id }))
+        }, (buttonId) => {
+          if (buttonId) {
+            const item = items.find(i => i.id === buttonId);
+            tg.openInvoice({
+              title: item.title,
+              description: "Thank you for supporting Dash Tap!",
+              payload: "dash-tap-" + buttonId,
+              currency: "XTR",
+              prices: [{ label: item.title, amount: item.price * 100 }]
+            });
+          }
+        });
+      });
+
+      tg.onEvent('invoiceClosed', (event) => {
+        if (event.status === 'paid') {
+          const id = event.payload.split('-')[1];
+          if (id === "noads") localStorage.setItem('noads', 'true');
+          if (id === "doublecoins") localStorage.setItem('doublecoins', 'true');
+          if (id === "vip") {
+            coins += 500;
+            localStorage.setItem('coins', coins);
+            document.getElementById('coinCount').textContent = coins;
+            skin = 'galaxy';
+            localStorage.setItem('skin', skin);
+          }
+          toast('Thank you! Reward activated');
+        }
+      });
+    }
+
+    // AdMob Mock/Real Setup
+    let rewardedAd = null;
+    
+    // Check if admob is defined (it won't be in a regular browser)
+    if (typeof admob === 'undefined') {
+        // MOCK AdMob for browser testing
+        window.admob = {
+            rewarded: {
+                // Prepare does nothing, just logs a message
+                prepare: () => console.log('AdMob: Mock Ad prepared'),
+                // Show simulates the ad experience
+                show: () => {
+                    console.log('AdMob: Mock Ad shown, rewarding user.');
+                    // Simulate a delay and reward
+                    setTimeout(() => {
+                        const rewardAmount = 100;
+                        coins += rewardAmount;
+                        localStorage.setItem('coins', coins);
+                        document.getElementById('coinCount').textContent = coins;
+                        toast(`Ad Watched: +${rewardAmount} coins!`);
+                        
+                        // Re-prepare the mock ad for the next click
+                        initAdMob(); 
+                    }, 500);
+                }
+            }
+        };
+        rewardedAd = admob.rewarded; // Set the rewardedAd object to the mock
+    }
+    
+    function initAdMob() {
+      if (typeof admob !== 'undefined' && admob.rewarded) {
+        // If real AdMob is present, this will prepare the real ad.
+        admob.rewarded.prepare({
+          adId: 'ca-app-pub-7478962418871581/3376202790'
+        });
+        rewardedAd = admob.rewarded;
+      }
+    }
+    
+    document.getElementById('adBtn').onclick = () => {
+      if (localStorage.getItem('noads') === 'true') {
+        toast('Ads disabled. Enjoy!');
+        return;
+      }
+      if (rewardedAd && rewardedAd.show) {
+          rewardedAd.show();
+      } else {
+        toast('Ad is not ready yet. Try again.');
+        // Re-attempt to initialize the ad
+        initAdMob();
+      }
+    };
+
+    // Canvas setup
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let DPR = Math.min(2, window.devicePixelRatio || 1);
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.round(rect.width * DPR);
+      canvas.height = Math.round(rect.height * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Initial UI update
+    document.getElementById('bestLocal').textContent = best;
+    document.getElementById('coinCount').textContent = coins;
+    document.getElementById('streak').textContent = streak;
+
+    // Sounds
+    const tapSound = document.getElementById('tapSound');
+    const gameOverSound = document.getElementById('gameOverSound');
+    function playTap() { tapSound.currentTime = 0; tapSound.play().catch(() => {}); }
+    function playGameOver() { gameOverSound.currentTime = 0; gameOverSound.play().catch(() => {}); }
+
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+    function toast(msg, t = 1800) {
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = msg;
+      document.getElementById('toastHolder').appendChild(el);
+      setTimeout(() => el.remove(), t);
+    }
+
+    function spawnParticles(x, y, color, count = 14) {
+      for (let i = 0; i < count; i++) {
+        particles.push({ x, y, vx: rand(-3, 3), vy: rand(-5, -0.5), life: rand(30, 60), age: 0, color });
+      }
+    }
+
+    function drawBackground() {
+      ctx.save();
+      const w = canvas.width / DPR, h = canvas.height / DPR;
+      const g = ctx.createLinearGradient(0, 0, w, h);
+      g.addColorStop(0, 'rgba(0,20,30,0.25)');
+      g.addColorStop(1, 'rgba(0,6,12,0.55)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      ctx.globalAlpha = 0.04; ctx.fillStyle = '#fff';
+      for (let i = 0; i < 8; i++) ctx.fillRect((i * 40 + (Date.now() / 120 % 40)), 0, 1, h);
+      ctx.globalAlpha = 1; ctx.restore();
+    }
+
+    function drawTarget() {
+      const s = skins.find(x => x.id === skin) || skins[0];
+      const g = ctx.createRadialGradient(target.x, target.y, target.r * 0.2, target.x, target.y, target.r * 1.6);
+      g.addColorStop(0, 'rgba(0,255,225,0.12)');
+      g.addColorStop(1, 'rgba(0,16,20,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(target.x, target.y, target.r * 1.6, 0, Math.PI * 2); ctx.fill();
+      s.draw(target.x, target.y, target.r);
+      ctx.beginPath(); ctx.lineWidth = 3;
+      ctx.strokeStyle = `rgba(0,255,225,${0.12 + 0.06 * Math.sin(Date.now() / 180)})`;
+      ctx.arc(target.x, target.y, target.r + 6, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    function drawParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.age++;
+        ctx.globalAlpha = Math.max(0, 1 - p.age / p.life);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 3, 3);
+        ctx.globalAlpha = 1;
+        if (p.age > p.life) particles.splice(i, 1);
+      }
+    }
+
+    let startTime = 0;
+    function startTimer() {
+      startTime = Date.now();
+      if (timerRef) clearTimeout(timerRef);
+      timerRef = setTimeout(endGame, timeLimit);
+    }
+    function timeLeft() {
+      return Math.max(0, timeLimit - (Date.now() - startTime));
+    }
+
+    let lastFrame = Date.now();
+    function loop() {
+      if (!running) return;
+      const now = Date.now();
+      lastFrame = now;
+      ctx.clearRect(0, 0, canvas.width / DPR, canvas.height / DPR);
+      drawBackground();
+      drawTarget();
+      const rem = timeLeft() / timeLimit;
+      ctx.beginPath(); ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,255,225,0.6)';
+      ctx.arc(canvas.width / DPR / 2, 18, 10, -Math.PI / 2, -Math.PI / 2 + rem * Math.PI * 2); ctx.stroke();
+      drawParticles();
+      requestAnimationFrame(loop);
+    }
+
+    function randomizeTarget() {
+      target.x = rand(40, canvas.width / DPR - 40);
+      target.y = rand(60, canvas.height / DPR - 60);
+      target.r = Math.max(20, rand(26, 44));
+    }
+
+    function startGame() {
+      score = 0; document.getElementById('score').textContent = 0; timeLimit = 1200; running = true;
+      randomizeTarget(); document.getElementById('startScreen').style.display = 'none';
+      startTimer(); lastFrame = Date.now(); requestAnimationFrame(loop);
+    }
+
+    function endGame() {
+      running = false; clearTimeout(timerRef);
+      playGameOver();
+      const coinMultiplier = localStorage.getItem('doublecoins') === 'true' ? 2 : 1;
+      const reward = Math.floor(score / 2) * coinMultiplier;
+      
+      coins += reward;
+      localStorage.setItem('coins', coins); document.getElementById('coinCount').textContent = coins;
+      
+      const now = Date.now(), oneDay = 24 * 60 * 60 * 1000;
+      if (now - lastPlay < oneDay * 1.5) { streak = Math.min(999, streak + 1); } else { streak = 1; }
+      lastPlay = now; localStorage.setItem('lastPlay', lastPlay); localStorage.setItem('streak', streak);
+      document.getElementById('streak').textContent = streak;
+      
+      if (score > best) { best = score; localStorage.setItem('best', best); document.getElementById('bestLocal').textContent = best; }
+      
+      spawnParticles(target.x, target.y, '#00ffe1', 30);
+      submitScore(score);
+      
+      setTimeout(() => { toast(`Game Over — Score: ${score} (+ ${reward} coins)`); document.getElementById('startScreen').style.display = 'flex'; }, 120);
+    }
+
+    function onTap(e) {
+      e.preventDefault(); 
+      e.stopPropagation(); 
+
+      if (!running) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      
+      // FIX: Map client coordinates to the canvas's VIRTUAL CSS dimensions (320x480)
+      const x = (clientX - rect.left) * (320 / rect.width);
+      const y = (clientY - rect.top) * (480 / rect.height);
+      
+      const dx = x - target.x, dy = y - target.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      // We check if the distance is less than the target radius + a small margin of 6 pixels.
+      if (dist < target.r + 6) { 
+        playTap();
+        score++; document.getElementById('score').textContent = score;
+        
+        const coinMultiplier = localStorage.getItem('doublecoins') === 'true' ? 2 : 1;
+        if (Math.random() < 0.28) {
+          coins += 1 * coinMultiplier; 
+          localStorage.setItem('coins', coins); 
+          document.getElementById('coinCount').textContent = coins;
+          spawnParticles(x, y, '#ffd166', 12);
+        }
+        
+        spawnParticles(x, y, '#00ffe1', 18);
+        timeLimit = Math.max(360, timeLimit - Math.max(16, Math.floor(score * 0.6)));
+        randomizeTarget(); startTimer();
+      } else {
+        endGame();
+      }
+    }
+    
+    canvas.addEventListener('mousedown', onTap);
+    canvas.addEventListener('touchstart', onTap);
+
+    async function submitScore(scoreVal) {
+      const name = document.getElementById('userName').textContent || 'Player';
+      const payload = { name, score: Number(scoreVal), date: new Date().toISOString().slice(0, 10) };
+      try {
+        await fetch(SHEETDB_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) { }
+    }
+
+    async function loadLeaderboard() {
+      const div = document.getElementById('leaderList');
+      div.innerHTML = '<div class="muted">Loading…</div>';
+      try {
+        const res = await fetch(SHEETDB_URL + '?sort_by=score&sort_order=desc');
+        const data = await res.json();
+        div.innerHTML = data.slice(0, 20).map((r, i) => `
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.02)">
+            <div><strong>${i + 1}. ${r.name || 'Player'}</strong></div>
+            <div>${r.score}</div>
+          </div>`).join('');
+      } catch (e) {
+        div.innerHTML = '<div class="muted">No connection</div>';
+      }
+    }
+
+    function showShop() {
+      const list = document.getElementById('shopList'); list.innerHTML = '';
+      skins.forEach(s => {
+        const el = document.createElement('div'); el.className = 'skin';
+        el.innerHTML = `<div style="text-align:center">${s.label}<div style="font-size:12px;color:var(--muted)">${s.cost}¢</div></div>`;
+        el.onclick = () => {
+          if (s.id === skin) { toast('Equipped'); return; }
+          if (coins >= s.cost) {
+            coins -= s.cost; localStorage.setItem('coins', coins); document.getElementById('coinCount').textContent = coins;
+            skin = s.id; localStorage.setItem('skin', skin); toast('Bought: ' + s.label);
+          } else toast('Not enough coins');
+        };
+        list.appendChild(el);
+      });
+      document.getElementById('shopModal').style.display = 'flex';
+    }
+
+    document.getElementById('startBtn').onclick = startGame;
+    document.getElementById('shopBtn').onclick = showShop;
+    document.getElementById('closeShop').onclick = () => document.getElementById('shopModal').style.display = 'none';
+    document.getElementById('leaderBtn').onclick = () => { document.getElementById('leaderModal').style.display = 'flex'; loadLeaderboard(); };
+    document.getElementById('closeLeader').onclick = () => document.getElementById('leaderModal').style.display = 'none';
+
+    // Daily bonus
+    (function () {
+      const today = new Date().toDateString();
+      if (localStorage.getItem('dailyGrant') !== today) {
+        coins += 8; localStorage.setItem('coins', coins); document.getElementById('coinCount').textContent = coins;
+        localStorage.setItem('dailyGrant', today);
+        toast('Daily bonus: +8 coins');
+      }
+    })();
+
+    // Init AdMob
+    window.onload = () => {
+      initAdMob();
+    };
+  </script>
+</body>
+</html>
