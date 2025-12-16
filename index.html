@@ -5,29 +5,105 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Dash Tap — Neon</title>
   <link rel="manifest" href="manifest.json" />
+  
   <style>
-    :root{--bg:#060717;--card:#0d1620;--accent:#00ffe1;--muted:#9aa4b2;--hot:#ff6b6b}
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#020316,#081428);color:#eaf6f1}
-    .container{width:360px;max-width:96vw;margin:14px auto;padding:14px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));box-shadow:0 8px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.02)}
-    header{display:flex;justify-content:space-between;align-items:center}
-    h1{margin:0;font-size:18px}
-    .small{font-size:12px;color:var(--muted)}
-    #gameWrap{margin-top:12px;display:flex;flex-direction:column;align-items:center}
-    canvas{width:320px;height:480px;border-radius:12px;background:linear-gradient(180deg,#041022,#081827);touch-action:none}
-    .hud{width:320px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
-    .scoreBox{background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:10px;font-weight:700}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-    .btn{background:linear-gradient(180deg,#12202a,#0a1418);padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);font-size:13px;color:#eaf6f1}
-    .panel{background:linear-gradient(180deg,#071226,#0c1720);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);width:300px;text-align:center}
-    .big{font-size:22px;font-weight:800;margin:6px 0}
-    .muted{color:var(--muted);font-size:13px}
-    .shop{display:flex;gap:8px;margin-top:8px;overflow:auto;padding-bottom:8px}
-    .skin{min-width:64px;height:64px;border-radius:10px;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.03)}
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:50}
-    .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60}
-    .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0d1720;color:#eaf6f1;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04)}
+    :root {
+      --bg: #060717;
+      --card: #0d1620;
+      --accent: #00ffe1;
+      --muted: #9aa4b2;
+      --hot: #ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: linear-gradient(180deg, #020316, #081428);
+      color: #eaf6f1;
+    }
+    .container {
+      width: 360px;
+      max-width: 96vw;
+      margin: 14px auto;
+      padding: 14px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.02);
+    }
+    header { display: flex; justify-content: space-between; align-items: center; }
+    h1 { margin: 0; font-size: 18px; }
+    .small { font-size: 12px; color: var(--muted); }
+    #gameWrap { margin-top: 12px; display: flex; flex-direction: column; align-items: center; }
+    canvas {
+      width: 320px;
+      height: 480px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #041022, #081827);
+      touch-action: none;
+    }
+    .hud { width: 320px; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    .scoreBox { background: rgba(255,255,255,0.02); padding: 6px 10px; border-radius: 10px; font-weight: 700; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      background: linear-gradient(180deg, #12202a, #0a1418);
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.03);
+      font-size: 13px;
+      color: #eaf6f1;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,255,225,0.1); }
+    .btn-primary { background: linear-gradient(180deg, #00ffe1, #008c7a); color: #000; font-weight: bold; }
+    .panel {
+      background: linear-gradient(180deg, #071226, #0c1720);
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.03);
+      width: 300px;
+      text-align: center;
+    }
+    .big { font-size: 22px; font-weight: 800; margin: 6px 0; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .shop { display: flex; gap: 8px; margin-top: 8px; overflow: auto; padding-bottom: 8px; }
+    .skin {
+      min-width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .skin:hover { transform: scale(1.05); }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; }
+    .modal { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 60; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: #0d1720;
+      color: #eaf6f1;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .continue-options { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; justify-content: center; }
+    .shake { animation: shake 0.5s; }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 10%,30%,50%,70%,90% { transform: translateX(-2px); } 20%,40%,60%,80% { transform: translateX(2px); } }
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,225,0.4); } 70% { box-shadow: 0 0 0 10px rgba(0,255,225,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,225,0); } }
+    .floating { animation: floating 3s ease-in-out infinite; }
+    @keyframes floating { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
   </style>
+
+  <!-- Ads and Telegram -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7478962418871581" crossorigin="anonymous"></script>
   <script src="https://telegram.org/js/games.js"></script>
 </head>
@@ -43,189 +119,120 @@
         <div class="small">Streak <span id="streak">0</span></div>
       </div>
     </header>
+
     <div id="gameWrap">
       <div style="position:relative">
-        <canvas id="gameCanvas" width="320" height="480"></canvas>
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Start Screen -->
         <div id="startScreen" style="display:flex;position:absolute;inset:0;align-items:center;justify-content:center;z-index:20">
           <div class="panel">
             <div class="big">Dash Tap — Neon</div>
-            <div class="muted">Tap the glowing target before the timer runs out. Each hit speeds up the game.</div>
+            <div class="muted">Tap the glowing target before time runs out. Each hit speeds it up!</div>
             <div style="height:12px"></div>
-            <button class="btn" id="startBtn">Start</button>
-            <div style="height:8px"></div>
-            <div style="display:flex;justify-content:space-between;margin-top:10px">
+            <button class="btn btn-primary" id="startBtn">Start Game</button>
+            <div style="height:12px"></div>
+            <div style="display:flex;justify-content:space-between">
               <div class="muted">Best <strong id="bestLocal">0</strong></div>
-              <div class="muted">Mode <strong id="modeLabel">Classic</strong></div>
+              <div class="muted">Combo <strong id="bestCombo">0</strong></div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="hud">
-        <div class="scoreBox">Score: <span id="score">0</span></div>
-        <div class="controls">
-          <button class="btn" id="adBtn">Watch Ad +100 Coins</button>
-          <button class="btn" id="shopBtn">Shop</button>
-          <button class="btn" id="leaderBtn">Leaderboard</button>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;z-index:20">
+          <div class="panel">
+            <div class="big">Game Over!</div>
+            <div class="muted">Score: <strong id="finalScore">0</strong></div>
+            <div class="muted">Best: <strong id="finalBest">0</strong></div>
+            <div class="muted">Combo: <strong id="finalCombo">0</strong></div>
+            <div class="continue-options">
+              <button class="btn btn-primary" id="continueBtn">Watch Ad to Continue</button>
+              <button class="btn" id="restartBtn">Start Again</button>
+            </div>
+            <div style="margin-top:10px" class="muted">Continues left: <span id="continuesLeft">3</span></div>
+          </div>
         </div>
       </div>
+
+      <div class="hud">
+        <div class="scoreBox">Score: <span id="score">0</span></div>
+        <div class="scoreBox">Combo: <span id="combo">0</span></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="adBtn">Watch Ad +100 Coins</button>
+        <button class="btn" id="shopBtn">Shop</button>
+        <button class="btn" id="leaderBtn">Leaderboard</button>
+      </div>
+
+      <!-- Shop Modal -->
       <div id="shopModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center">
         <div class="modal-backdrop"></div>
         <div class="panel modal" style="width:320px;max-width:94vw">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <div class="big">Shop</div><button class="btn" id="closeShop">Close</button>
+            <div class="big">Shop</div>
+            <button class="btn" id="closeShop">Close</button>
           </div>
-          <div class="muted" style="margin-top:6px">Buy skins using coins</div>
+          <div class="muted" style="margin-top:6px">Buy skins with coins</div>
           <div class="shop" id="shopList"></div>
         </div>
       </div>
+
+      <!-- Leaderboard Modal -->
       <div id="leaderModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center">
         <div class="modal-backdrop"></div>
         <div class="panel modal" style="width:320px;max-width:94vw">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <div class="big">Leaderboard</div><button class="btn" id="closeLeader">Close</button>
+            <div class="big">Leaderboard</div>
+            <button class="btn" id="closeLeader">Close</button>
           </div>
           <div id="leaderList" style="margin-top:8px;max-height:260px;overflow:auto"><div class="muted">Loading…</div></div>
         </div>
       </div>
-      <footer style="text-align:center;margin-top:8px"><div class="muted">Built for Telegram Mini Apps — Works in browser too</div></footer>
+
+      <footer style="text-align:center;margin-top:8px">
+        <div class="muted">Built for Telegram Mini Apps — Works in browser too</div>
+      </footer>
     </div>
   </div>
+
   <div id="toastHolder" style="pointer-events:none"></div>
+
+  <!-- Sounds -->
   <audio id="tapSound" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
+  <audio id="comboSound" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
   <audio id="gameOverSound" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-losing-bleep-2029.mp3"></audio>
 
   <script>
+    // ==================== CONFIG & STATE ====================
     const SHEETDB_URL = "https://sheetdb.io/api/v1/1ir7bgefz4eyr";
 
-    // Game state (declared globally)
-    let score = 0, best = Number(localStorage.getItem('best') || 0), timeLimit = 1200, running = false;
-    let target = { x: 160, y: 240, r: 36 }, timerRef = null, particles = [];
+    let score = 0, best = Number(localStorage.getItem('best') || 0);
+    let combo = 0, bestCombo = Number(localStorage.getItem('bestCombo') || 0);
     let coins = Number(localStorage.getItem('coins') || 0);
     let streak = Number(localStorage.getItem('streak') || 0);
     let lastPlay = Number(localStorage.getItem('lastPlay') || 0);
+    let continuesLeft = Number(localStorage.getItem('continuesLeft') || 3);
     let skin = localStorage.getItem('skin') || 'neon';
+    let running = false, isGameOver = false;
+    let timeLimit = 1200, startTime = 0;
+    let target = { x: 160, y: 240, r: 36 };
+    let particles = [];
+    let timeSlow = false, timeSlowEnd = 0;
 
     const skins = [
-      { id: 'neon', cost: 0, label: 'Neon', draw: (x, y, r) => { let g = ctx.createRadialGradient(x, y, 2, x, y, r); g.addColorStop(0, '#00ffe1'); g.addColorStop(1, '#00383a'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); } },
-      { id: 'gold', cost: 150, label: 'Gold', draw: (x, y, r) => { let g = ctx.createLinearGradient(x - r, y - r, x + r, y + r); g.addColorStop(0, '#ffdc7b'); g.addColorStop(1, '#d88b00'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); } },
-      { id: 'galaxy', cost: 250, label: 'Galaxy', draw: (x, y, r) => { let g = ctx.createRadialGradient(x, y, 2, x, y, r); g.addColorStop(0, '#b28cff'); g.addColorStop(1, '#140026'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); } },
-      { id: 'block', cost: 80, label: 'Block', draw: (x, y, r) => { ctx.fillStyle = '#ff7b7b'; ctx.fillRect(x - r, y - r, r * 2, r * 2); } }
+      { id: 'neon', cost: 0, label: 'Neon', draw: (x,y,r) => { let g = ctx.createRadialGradient(x,y,2,x,y,r); g.addColorStop(0,'#00ffe1'); g.addColorStop(1,'#00383a'); ctx.fillStyle = g; ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); } },
+      { id: 'gold', cost: 150, label: 'Gold', draw: (x,y,r) => { let g = ctx.createLinearGradient(x-r,y-r,x+r,y+r); g.addColorStop(0,'#ffdc7b'); g.addColorStop(1,'#d88b00'); ctx.fillStyle = g; ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); } },
+      { id: 'galaxy', cost: 250, label: 'Galaxy', draw: (x,y,r) => { let g = ctx.createRadialGradient(x,y,2,x,y,r); g.addColorStop(0,'#b28cff'); g.addColorStop(1,'#140026'); ctx.fillStyle = g; ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); } },
+      { id: 'block', cost: 80, label: 'Block', draw: (x,y,r) => { ctx.fillStyle = '#ff7b7b'; ctx.fillRect(x-r,y-r,r*2,r*2); } }
     ];
 
-    // Telegram WebApp & Stars
-    const tg = window.Telegram?.WebApp || null;
-    if (tg) {
-      tg.ready();
-      tg.expand();
-      if (tg.initDataUnsafe?.user) {
-        document.getElementById('userName').textContent = tg.initDataUnsafe.user.first_name || tg.initDataUnsafe.user.username || 'Player';
-      }
-
-      const items = [
-        { id: "noads", title: "Remove Ads Forever", price: 19 },
-        { id: "doublecoins", title: "2x Coins Forever", price: 49 },
-        { id: "vip", title: "VIP Skin + 500 Coins", price: 99 }
-      ];
-
-      tg.MainButton.text = "Shop (⭐)";
-      tg.MainButton.color = "#00ffe1";
-      tg.MainButton.textColor = "#000";
-      tg.MainButton.show();
-
-      tg.MainButton.onClick(() => {
-        tg.showPopup({
-          title: "Buy with Stars",
-          message: "Choose a boost",
-          buttons: items.map(item => ({ type: "default", text: `${item.title} — ${item.price} ⭐`, id: item.id }))
-        }, (buttonId) => {
-          if (buttonId) {
-            const item = items.find(i => i.id === buttonId);
-            tg.openInvoice({
-              title: item.title,
-              description: "Thank you for supporting Dash Tap!",
-              payload: "dash-tap-" + buttonId,
-              currency: "XTR",
-              prices: [{ label: item.title, amount: item.price * 100 }]
-            });
-          }
-        });
-      });
-
-      tg.onEvent('invoiceClosed', (event) => {
-        if (event.status === 'paid') {
-          const id = event.payload.split('-')[1];
-          if (id === "noads") localStorage.setItem('noads', 'true');
-          if (id === "doublecoins") localStorage.setItem('doublecoins', 'true');
-          if (id === "vip") {
-            coins += 500;
-            localStorage.setItem('coins', coins);
-            document.getElementById('coinCount').textContent = coins;
-            skin = 'galaxy';
-            localStorage.setItem('skin', skin);
-          }
-          toast('Thank you! Reward activated');
-        }
-      });
-    }
-
-    // AdMob Mock/Real Setup
-    let rewardedAd = null;
-    
-    // Check if admob is defined (it won't be in a regular browser)
-    if (typeof admob === 'undefined') {
-        // MOCK AdMob for browser testing
-        window.admob = {
-            rewarded: {
-                // Prepare does nothing, just logs a message
-                prepare: () => console.log('AdMob: Mock Ad prepared'),
-                // Show simulates the ad experience
-                show: () => {
-                    console.log('AdMob: Mock Ad shown, rewarding user.');
-                    // Simulate a delay and reward
-                    setTimeout(() => {
-                        const rewardAmount = 100;
-                        coins += rewardAmount;
-                        localStorage.setItem('coins', coins);
-                        document.getElementById('coinCount').textContent = coins;
-                        toast(`Ad Watched: +${rewardAmount} coins!`);
-                        
-                        // Re-prepare the mock ad for the next click
-                        initAdMob(); 
-                    }, 500);
-                }
-            }
-        };
-        rewardedAd = admob.rewarded; // Set the rewardedAd object to the mock
-    }
-    
-    function initAdMob() {
-      if (typeof admob !== 'undefined' && admob.rewarded) {
-        // If real AdMob is present, this will prepare the real ad.
-        admob.rewarded.prepare({
-          adId: 'ca-app-pub-7478962418871581/3376202790'
-        });
-        rewardedAd = admob.rewarded;
-      }
-    }
-    
-    document.getElementById('adBtn').onclick = () => {
-      if (localStorage.getItem('noads') === 'true') {
-        toast('Ads disabled. Enjoy!');
-        return;
-      }
-      if (rewardedAd && rewardedAd.show) {
-          rewardedAd.show();
-      } else {
-        toast('Ad is not ready yet. Try again.');
-        // Re-attempt to initialize the ad
-        initAdMob();
-      }
-    };
-
-    // Canvas setup
+    // ==================== CANVAS SETUP ====================
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     let DPR = Math.min(2, window.devicePixelRatio || 1);
+
     function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
       canvas.width = Math.round(rect.width * DPR);
@@ -235,54 +242,64 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Initial UI update
-    document.getElementById('bestLocal').textContent = best;
-    document.getElementById('coinCount').textContent = coins;
-    document.getElementById('streak').textContent = streak;
-
-    // Sounds
-    const tapSound = document.getElementById('tapSound');
-    const gameOverSound = document.getElementById('gameOverSound');
-    function playTap() { tapSound.currentTime = 0; tapSound.play().catch(() => {}); }
-    function playGameOver() { gameOverSound.currentTime = 0; gameOverSound.play().catch(() => {}); }
-
+    // ==================== UTILS ====================
     function rand(min, max) { return Math.random() * (max - min) + min; }
-    function toast(msg, t = 1800) {
+    function toast(msg, time = 1800) {
       const el = document.createElement('div');
       el.className = 'toast';
       el.textContent = msg;
       document.getElementById('toastHolder').appendChild(el);
-      setTimeout(() => el.remove(), t);
+      setTimeout(() => el.remove(), time);
     }
 
     function spawnParticles(x, y, color, count = 14) {
       for (let i = 0; i < count; i++) {
-        particles.push({ x, y, vx: rand(-3, 3), vy: rand(-5, -0.5), life: rand(30, 60), age: 0, color });
+        particles.push({ x, y, vx: rand(-3,3), vy: rand(-5,-0.5), life: rand(30,60), age: 0, color, size: rand(2,4) });
       }
     }
 
+    // ==================== DRAWING ====================
     function drawBackground() {
-      ctx.save();
       const w = canvas.width / DPR, h = canvas.height / DPR;
-      const g = ctx.createLinearGradient(0, 0, w, h);
-      g.addColorStop(0, 'rgba(0,20,30,0.25)');
-      g.addColorStop(1, 'rgba(0,6,12,0.55)');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-      ctx.globalAlpha = 0.04; ctx.fillStyle = '#fff';
-      for (let i = 0; i < 8; i++) ctx.fillRect((i * 40 + (Date.now() / 120 % 40)), 0, 1, h);
-      ctx.globalAlpha = 1; ctx.restore();
+      const g = ctx.createLinearGradient(0,0,w,h);
+      g.addColorStop(0,'rgba(0,20,30,0.25)'); g.addColorStop(1,'rgba(0,6,12,0.55)');
+      ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+
+      ctx.globalAlpha = 0.15; ctx.fillStyle = '#fff';
+      for (let i = 0; i < 12; i++) {
+        const x = (i * 30 + (Date.now() / 200 % 30)) % w;
+        const y = Math.sin(i * 0.5 + Date.now() / 1000) * 20 + h/2;
+        const size = Math.sin(Date.now() / 1000 + i) * 2 + 2;
+        ctx.beginPath(); ctx.arc(x,y,size,0,Math.PI*2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
     }
 
     function drawTarget() {
-      const s = skins.find(x => x.id === skin) || skins[0];
-      const g = ctx.createRadialGradient(target.x, target.y, target.r * 0.2, target.x, target.y, target.r * 1.6);
-      g.addColorStop(0, 'rgba(0,255,225,0.12)');
-      g.addColorStop(1, 'rgba(0,16,20,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(target.x, target.y, target.r * 1.6, 0, Math.PI * 2); ctx.fill();
+      const s = skins.find(sk => sk.id === skin) || skins[0];
+      const pulse = 0.12 + 0.08 * Math.sin(Date.now() / 180);
+
+      // Glow
+      const g = ctx.createRadialGradient(target.x, target.y, target.r * 0.2, target.x, target.y, target.r * 2);
+      g.addColorStop(0, `rgba(0,255,225,${pulse})`); g.addColorStop(1, 'rgba(0,16,20,0)');
+      ctx.fillStyle = g; ctx.arc(target.x, target.y, target.r * 2, 0, Math.PI*2); ctx.fill();
+
+      // Target
+      ctx.beginPath();
       s.draw(target.x, target.y, target.r);
-      ctx.beginPath(); ctx.lineWidth = 3;
-      ctx.strokeStyle = `rgba(0,255,225,${0.12 + 0.06 * Math.sin(Date.now() / 180)})`;
-      ctx.arc(target.x, target.y, target.r + 6, 0, Math.PI * 2); ctx.stroke();
+
+      // Ring
+      ctx.lineWidth = combo > 5 ? 5 : 3;
+      ctx.strokeStyle = combo > 10 ? '#ffd700' : combo > 5 ? '#ff6b6b' : `rgba(0,255,225,${pulse})`;
+      ctx.arc(target.x, target.y, target.r + 6, 0, Math.PI*2); ctx.stroke();
+
+      // Combo text
+      if (combo > 3) {
+        ctx.fillStyle = combo > 10 ? '#ffd700' : '#ff6b6b';
+        ctx.font = 'bold 14px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${combo}x`, target.x, target.y + 4);
+      }
     }
 
     function drawParticles() {
@@ -291,122 +308,247 @@
         p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.age++;
         ctx.globalAlpha = Math.max(0, 1 - p.age / p.life);
         ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, 3, 3);
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
         ctx.globalAlpha = 1;
         if (p.age > p.life) particles.splice(i, 1);
       }
     }
 
-    let startTime = 0;
-    function startTimer() {
-      startTime = Date.now();
-      if (timerRef) clearTimeout(timerRef);
-      timerRef = setTimeout(endGame, timeLimit);
-    }
-    function timeLeft() {
-      return Math.max(0, timeLimit - (Date.now() - startTime));
-    }
-
-    let lastFrame = Date.now();
+    // ==================== GAME LOOP ====================
     function loop() {
       if (!running) return;
-      const now = Date.now();
-      lastFrame = now;
+
+      if (timeSlow && Date.now() > timeSlowEnd) timeSlow = false;
+
       ctx.clearRect(0, 0, canvas.width / DPR, canvas.height / DPR);
       drawBackground();
       drawTarget();
-      const rem = timeLeft() / timeLimit;
-      ctx.beginPath(); ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,255,225,0.6)';
-      ctx.arc(canvas.width / DPR / 2, 18, 10, -Math.PI / 2, -Math.PI / 2 + rem * Math.PI * 2); ctx.stroke();
+
+      // Timer circle
+      const rem = timeLeft() / (timeSlow ? timeLimit * 1.5 : timeLimit);
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = timeSlow ? '#00ff00' : 'rgba(0,255,225,0.6)';
+      ctx.beginPath();
+      ctx.arc(canvas.width / DPR / 2, 18, 10, -Math.PI/2, -Math.PI/2 + rem * Math.PI*2);
+      ctx.stroke();
+
+      if (timeSlow) {
+        ctx.fillStyle = 'rgba(0,255,0,0.2)';
+        ctx.fillRect(0, 0, canvas.width / DPR, canvas.height / DPR);
+      }
+
       drawParticles();
+
+      if (timeLeft() <= 0) gameOver();
+
       requestAnimationFrame(loop);
     }
 
+    function startTimer() { startTime = Date.now(); }
+    function timeLeft() {
+      const elapsed = Date.now() - startTime;
+      const adjusted = timeSlow ? timeLimit * 1.5 : timeLimit;
+      return Math.max(0, adjusted - elapsed);
+    }
+
     function randomizeTarget() {
-      target.x = rand(40, canvas.width / DPR - 40);
-      target.y = rand(60, canvas.height / DPR - 60);
-      target.r = Math.max(20, rand(26, 44));
+      target.x = rand(50, canvas.width / DPR - 50);
+      target.y = rand(80, canvas.height / DPR - 80);
+      target.r = Math.max(24, rand(30, 48 - Math.min(20, score / 5)));
     }
 
+    // ==================== GAME CONTROL ====================
     function startGame() {
-      score = 0; document.getElementById('score').textContent = 0; timeLimit = 1200; running = true;
-      randomizeTarget(); document.getElementById('startScreen').style.display = 'none';
-      startTimer(); lastFrame = Date.now(); requestAnimationFrame(loop);
+      score = combo = 0;
+      timeLimit = 1200;
+      running = true;
+      isGameOver = false;
+      document.getElementById('score').textContent = 0;
+      document.getElementById('combo').textContent = 0;
+      document.getElementById('startScreen').style.display = 'none';
+      document.getElementById('gameOverScreen').style.display = 'none';
+      randomizeTarget();
+      startTimer();
+      requestAnimationFrame(loop);
     }
 
-    function endGame() {
-      running = false; clearTimeout(timerRef);
-      playGameOver();
-      const coinMultiplier = localStorage.getItem('doublecoins') === 'true' ? 2 : 1;
-      const reward = Math.floor(score / 2) * coinMultiplier;
-      
+    function gameOver() {
+      if (isGameOver) return;
+      running = false; isGameOver = true;
+      document.getElementById('gameOverSound').play().catch(() => {});
+
+      // Rewards
+      const multiplier = localStorage.getItem('doublecoins') === 'true' ? 2 : 1;
+      const reward = Math.floor(score / 2) * multiplier + combo * 2;
       coins += reward;
-      localStorage.setItem('coins', coins); document.getElementById('coinCount').textContent = coins;
-      
-      const now = Date.now(), oneDay = 24 * 60 * 60 * 1000;
-      if (now - lastPlay < oneDay * 1.5) { streak = Math.min(999, streak + 1); } else { streak = 1; }
-      lastPlay = now; localStorage.setItem('lastPlay', lastPlay); localStorage.setItem('streak', streak);
+      localStorage.setItem('coins', coins);
+      document.getElementById('coinCount').textContent = coins;
+
+      // Streak & best
+      const now = Date.now();
+      if (now - lastPlay < 24*60*60*1000 * 1.5) streak++; else streak = 1;
+      lastPlay = now;
+      localStorage.setItem('lastPlay', lastPlay);
+      localStorage.setItem('streak', streak);
       document.getElementById('streak').textContent = streak;
-      
+
       if (score > best) { best = score; localStorage.setItem('best', best); document.getElementById('bestLocal').textContent = best; }
-      
-      spawnParticles(target.x, target.y, '#00ffe1', 30);
+      if (combo > bestCombo) { bestCombo = combo; localStorage.setItem('bestCombo', bestCombo); document.getElementById('bestCombo').textContent = bestCombo; }
+
+      // Show Game Over
+      document.getElementById('finalScore').textContent = score;
+      document.getElementById('finalBest').textContent = best;
+      document.getElementById('finalCombo').textContent = combo;
+      document.getElementById('continuesLeft').textContent = continuesLeft;
+
+      spawnParticles(target.x, target.y, '#ff0000', 40);
       submitScore(score);
-      
-      setTimeout(() => { toast(`Game Over — Score: ${score} (+ ${reward} coins)`); document.getElementById('startScreen').style.display = 'flex'; }, 120);
+
+      setTimeout(() => {
+        document.getElementById('gameOverScreen').style.display = 'flex';
+        canvas.classList.add('shake');
+        setTimeout(() => canvas.classList.remove('shake'), 500);
+      }, 300);
     }
 
-    function onTap(e) {
-      e.preventDefault(); 
-      e.stopPropagation(); 
+    function continueGame() {
+      isGameOver = false;
+      document.getElementById('gameOverScreen').style.display = 'none';
+      timeLimit = Math.max(800, 1200 - score * 8);
+      running = true;
+      timeSlow = true;
+      timeSlowEnd = Date.now() + 3000;
+      spawnParticles(target.x, target.y, '#00ff00', 40);
+      canvas.classList.add('pulse');
+      setTimeout(() => canvas.classList.remove('pulse'), 1000);
+      randomizeTarget();
+      startTimer();
+      requestAnimationFrame(loop);
+    }
 
-      if (!running) return;
-      
+    // Tap handler
+    function onTap(e) {
+      e.preventDefault();
+      if (!running || isGameOver) return;
+
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      
-      // FIX: Map client coordinates to the canvas's VIRTUAL CSS dimensions (320x480)
       const x = (clientX - rect.left) * (320 / rect.width);
       const y = (clientY - rect.top) * (480 / rect.height);
-      
-      const dx = x - target.x, dy = y - target.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      
-      // We check if the distance is less than the target radius + a small margin of 6 pixels.
-      if (dist < target.r + 6) { 
-        playTap();
-        score++; document.getElementById('score').textContent = score;
-        
-        const coinMultiplier = localStorage.getItem('doublecoins') === 'true' ? 2 : 1;
-        if (Math.random() < 0.28) {
-          coins += 1 * coinMultiplier; 
-          localStorage.setItem('coins', coins); 
+
+      const dist = Math.hypot(x - target.x, y - target.y);
+      if (dist < target.r + 6) {
+        document.getElementById('tapSound').play().catch(() => {});
+        score++; combo++;
+        document.getElementById('score').textContent = score;
+        document.getElementById('combo').textContent = combo;
+
+        if (combo % 5 === 0) {
+          document.getElementById('comboSound').play().catch(() => {});
+          coins += combo * 2;
+          localStorage.setItem('coins', coins);
+          document.getElementById('coinCount').textContent = coins;
+          spawnParticles(x, y, '#ffd700', 25);
+          toast(`Combo \( {combo}! + \){combo * 2} coins`);
+        }
+
+        if (Math.random() < 0.35) {
+          const mult = localStorage.getItem('doublecoins') === 'true' ? 2 : 1;
+          coins += mult;
+          localStorage.setItem('coins', coins);
           document.getElementById('coinCount').textContent = coins;
           spawnParticles(x, y, '#ffd166', 12);
         }
-        
+
         spawnParticles(x, y, '#00ffe1', 18);
-        timeLimit = Math.max(360, timeLimit - Math.max(16, Math.floor(score * 0.6)));
-        randomizeTarget(); startTimer();
+        timeLimit = Math.max(400, timeLimit - Math.max(14, Math.floor(score * 0.5)));
+        randomizeTarget();
+        startTimer();
       } else {
-        endGame();
+        gameOver();
       }
     }
-    
     canvas.addEventListener('mousedown', onTap);
     canvas.addEventListener('touchstart', onTap);
 
-    async function submitScore(scoreVal) {
-      const name = document.getElementById('userName').textContent || 'Player';
-      const payload = { name, score: Number(scoreVal), date: new Date().toISOString().slice(0, 10) };
+    // ==================== ADS & CONTINUE ====================
+    function showMonetagAd() {
+      return new Promise((resolve, reject) => {
+        if (typeof show_10336096 === 'function') {
+          show_10336096().then(resolve).catch(reject);
+        } else {
+          // Mock for testing
+          toast('Ad simulation');
+          setTimeout(resolve, 1500);
+        }
+      });
+    }
+
+    function showContinueAd() {
+      if (continuesLeft <= 0) { toast('No continues left!'); return; }
+      if (localStorage.getItem('noads') === 'true') { continueGame(); return; }
+
+      toast('Loading ad...');
+      showMonetagAd().then(() => {
+        continuesLeft--;
+        localStorage.setItem('continuesLeft', continuesLeft);
+        document.getElementById('continuesLeft').textContent = continuesLeft;
+        coins += 25;
+        localStorage.setItem('coins', coins);
+        document.getElementById('coinCount').textContent = coins;
+        continueGame();
+        toast('Continue granted! +25 coins');
+      }).catch(() => toast('Ad failed. Try again.'));
+    }
+
+    document.getElementById('adBtn').onclick = () => {
+      if (localStorage.getItem('noads') === 'true') { toast('Ads disabled!'); return; }
+      showMonetagAd().then(() => {
+        coins += 100;
+        localStorage.setItem('coins', coins);
+        document.getElementById('coinCount').textContent = coins;
+        toast('+100 coins!');
+        spawnParticles(160, 240, '#ffd700', 50);
+      });
+    };
+
+    // ==================== UI & OTHER ====================
+    function showShop() {
+      const list = document.getElementById('shopList');
+      list.innerHTML = '';
+      skins.forEach(s => {
+        const el = document.createElement('div');
+        el.className = 'skin';
+        el.style.borderColor = s.id === skin ? '#00ffe1' : '';
+        el.innerHTML = `<div style="text-align:center">\( {s.label}<div style="font-size:12px;color: \){s.id === skin ? '#00ffe1' : 'var(--muted)'}">${s.cost}¢</div></div>`;
+        el.onclick = () => {
+          if (s.id === skin) { toast('Already equipped'); return; }
+          if (coins >= s.cost) {
+            coins -= s.cost; skin = s.id;
+            localStorage.setItem('coins', coins); localStorage.setItem('skin', skin);
+            document.getElementById('coinCount').textContent = coins;
+            toast(`Bought: ${s.label}`);
+            showShop();
+          } else {
+            toast('Not enough coins');
+            canvas.classList.add('shake');
+            setTimeout(() => canvas.classList.remove('shake'), 500);
+          }
+        };
+        list.appendChild(el);
+      });
+      document.getElementById('shopModal').style.display = 'flex';
+    }
+
+    async function submitScore(val) {
       try {
         await fetch(SHEETDB_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ name: document.getElementById('userName').textContent || 'Player', score: val, date: new Date().toISOString().slice(0,10) })
         });
-      } catch (e) { }
+      } catch(e) {}
     }
 
     async function loadLeaderboard() {
@@ -415,52 +557,78 @@
       try {
         const res = await fetch(SHEETDB_URL + '?sort_by=score&sort_order=desc');
         const data = await res.json();
-        div.innerHTML = data.slice(0, 20).map((r, i) => `
+        div.innerHTML = data.slice(0,20).map((r,i) => `
           <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.02)">
-            <div><strong>${i + 1}. ${r.name || 'Player'}</strong></div>
-            <div>${r.score}</div>
+            <strong>\( {i+1}. \){r.name || 'Player'}</strong> <span>${r.score}</span>
           </div>`).join('');
-      } catch (e) {
-        div.innerHTML = '<div class="muted">No connection</div>';
-      }
+      } catch(e) { div.innerHTML = '<div class="muted">No connection</div>'; }
     }
 
-    function showShop() {
-      const list = document.getElementById('shopList'); list.innerHTML = '';
-      skins.forEach(s => {
-        const el = document.createElement('div'); el.className = 'skin';
-        el.innerHTML = `<div style="text-align:center">${s.label}<div style="font-size:12px;color:var(--muted)">${s.cost}¢</div></div>`;
-        el.onclick = () => {
-          if (s.id === skin) { toast('Equipped'); return; }
-          if (coins >= s.cost) {
-            coins -= s.cost; localStorage.setItem('coins', coins); document.getElementById('coinCount').textContent = coins;
-            skin = s.id; localStorage.setItem('skin', skin); toast('Bought: ' + s.label);
-          } else toast('Not enough coins');
-        };
-        list.appendChild(el);
-      });
-      document.getElementById('shopModal').style.display = 'flex';
-    }
-
+    // Event listeners
     document.getElementById('startBtn').onclick = startGame;
+    document.getElementById('continueBtn').onclick = showContinueAd;
+    document.getElementById('restartBtn').onclick = startGame;
     document.getElementById('shopBtn').onclick = showShop;
     document.getElementById('closeShop').onclick = () => document.getElementById('shopModal').style.display = 'none';
     document.getElementById('leaderBtn').onclick = () => { document.getElementById('leaderModal').style.display = 'flex'; loadLeaderboard(); };
     document.getElementById('closeLeader').onclick = () => document.getElementById('leaderModal').style.display = 'none';
 
-    // Daily bonus
-    (function () {
+    // Daily bonus & continues refresh
+    (function() {
       const today = new Date().toDateString();
       if (localStorage.getItem('dailyGrant') !== today) {
-        coins += 8; localStorage.setItem('coins', coins); document.getElementById('coinCount').textContent = coins;
+        coins += 15; continuesLeft = 3;
+        localStorage.setItem('coins', coins); localStorage.setItem('continuesLeft', continuesLeft);
         localStorage.setItem('dailyGrant', today);
-        toast('Daily bonus: +8 coins');
+        document.getElementById('coinCount').textContent = coins;
+        document.getElementById('continuesLeft').textContent = continuesLeft;
+        toast('Daily bonus: +15 coins & full continues!');
+        setTimeout(() => spawnParticles(160,240,'#00ffe1',30), 500);
       }
     })();
 
-    // Init AdMob
+    function refreshContinues() {
+      const now = Date.now();
+      const last = Number(localStorage.getItem('lastContinueRefresh') || 0);
+      if (now - last > 2*60*60*1000 && continuesLeft < 3) {
+        continuesLeft++;
+        localStorage.setItem('continuesLeft', continuesLeft);
+        localStorage.setItem('lastContinueRefresh', now);
+        document.getElementById('continuesLeft').textContent = continuesLeft;
+        toast('Continue refreshed!');
+      }
+    }
+    setInterval(refreshContinues, 60000);
+
+    // Telegram integration
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready(); tg.expand();
+      if (tg.initDataUnsafe?.user) {
+        document.getElementById('userName').textContent = tg.initDataUnsafe.user.first_name || tg.initDataUnsafe.user.username || 'Player';
+      }
+      // ... (your existing Telegram shop code can go here if needed)
+    }
+
+    // Load Monetag script
+    function loadMonetag() {
+      const script = document.createElement('script');
+      script.src = 'https://sdk.monetag.com/script/loader/BD0tKFtA7e'; // ← Replace with your actual Monetag loader URL
+      script.async = true;
+      document.head.appendChild(script);
+    }
+
+    // Init
     window.onload = () => {
-      initAdMob();
+      loadMonetag();
+      refreshContinues();
+      canvas.classList.add('floating');
+      document.getElementById('bestLocal').textContent = best;
+      document.getElementById('bestCombo').textContent = bestCombo;
+      document.getElementById('coinCount').textContent = coins;
+      document.getElementById('streak').textContent = streak;
+      document.getElementById('continuesLeft').textContent = continuesLeft;
+      setTimeout(() => toast('Welcome! Tap fast and build combos!'), 1000);
     };
   </script>
 </body>
